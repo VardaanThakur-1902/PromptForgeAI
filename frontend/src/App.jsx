@@ -1,112 +1,71 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-const API_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+import Sidebar from "./components/Sidebar";
+import Header from "./components/Header";
+
+import Dashboard from "./pages/Dashboard";
+import Generator from "./pages/Generator";
+import History from "./pages/History";
+import Settings from "./pages/Settings";
+
+import "./App.css";
 
 function App() {
-  const [backendStatus, setBackendStatus] = useState("Checking...");
-  const [error, setError] = useState("");
 
-  useEffect(() => {
-    async function checkBackend() {
-      try {
-        const response = await fetch(`${API_URL}/api/health`);
+  const [activePage, setActivePage] = useState("dashboard");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-        if (!response.ok) {
-          throw new Error("Backend health check failed");
-        }
+  function renderPage() {
 
-        const data = await response.json();
-        setBackendStatus(data.status);
-      } catch (err) {
-        setBackendStatus("Disconnected");
-        setError(err.message);
-      }
+    switch (activePage) {
+
+      case "dashboard":
+        return (
+          <Dashboard setActivePage={setActivePage} />
+        );
+
+      case "generator":
+        return <Generator />;
+
+      case "history":
+        return (
+          <History setActivePage={setActivePage} />
+        );
+
+      case "settings":
+        return <Settings />;
+
+      default:
+        return (
+          <Dashboard setActivePage={setActivePage} />
+        );
     }
-
-    checkBackend();
-  }, []);
+  }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <header className="border-b border-slate-800 px-8 py-5">
-        <h1 className="text-2xl font-bold text-violet-400">
-          PromptForge AI
-        </h1>
-        <p className="text-sm text-slate-400">
-          Your universal AI prompt engineering assistant
-        </p>
-      </header>
+    <div className="app-layout">
 
-      <main className="mx-auto max-w-4xl px-6 py-20">
-        <div className="text-center">
-          <p className="mb-4 text-sm font-semibold text-violet-400">
-            AI PROMPT GENERATOR
-          </p>
+      <Sidebar
+        activePage={activePage}
+        setActivePage={setActivePage}
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
+      />
 
-          <h2 className="text-4xl font-bold md:text-5xl">
-            Turn your ideas into
-            <span className="block text-violet-400">
-              powerful AI prompts.
-            </span>
-          </h2>
+      <div className="main-area">
 
-          <p className="mx-auto mt-6 max-w-2xl text-slate-400">
-            Describe your project or task. PromptForge AI will
-            help you create detailed instructions for ChatGPT,
-            Claude and other AI platforms.
-          </p>
-        </div>
+        <Header
+          activePage={activePage}
+          setMobileOpen={setMobileOpen}
+        />
 
-        <div className="mt-12 rounded-2xl border border-slate-800 bg-slate-900 p-6">
-          <label className="mb-3 block font-medium">
-            Describe what you want to build
-          </label>
+        <main className="main-content">
+          {renderPage()}
+        </main>
 
-          <textarea
-            disabled
-            rows="5"
-            placeholder="Example: I want to build an AI-powered attendance management system..."
-            className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950 p-4 text-white placeholder-slate-500 outline-none"
-          />
+      </div>
 
-          <div className="mt-5 flex items-center justify-between gap-4">
-            <span className="text-sm text-slate-500">
-              AI generation will be enabled in upcoming phases.
-            </span>
-
-            <button
-              disabled
-              className="rounded-xl bg-violet-600 px-5 py-3 font-semibold opacity-60"
-            >
-              Generate Prompt
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-8 rounded-xl border border-slate-800 bg-slate-900 p-5">
-          <div className="flex items-center justify-between">
-            <span className="font-medium">
-              Backend Connection
-            </span>
-
-            <span className={
-              backendStatus === "healthy"
-                ? "text-green-400"
-                : "text-yellow-400"
-            }>
-              {backendStatus}
-            </span>
-          </div>
-
-          {error && (
-            <p className="mt-2 text-sm text-red-400">
-              {error}
-            </p>
-          )}
-        </div>
-      </main>
     </div>
   );
 }
